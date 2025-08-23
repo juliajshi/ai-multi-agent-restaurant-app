@@ -15,7 +15,7 @@ class Restaurant(BaseModel):
     """A single restaurant recommendation"""
 
     name: str = Field(description="Name of the restaurant")
-    address: str = Field(description="Full address of the restaurant")
+    coordinates: List[float] = Field(description="coordinates of the restaurant")
     rating: float = Field(description="Average rating (1-5 stars)")
     user_ratings_total: int = Field(description="Total number of reviews")
     cuisine_types: List[str] = Field(description="Types of cuisine served")
@@ -35,22 +35,8 @@ class RestaurantResponse(BaseModel):
     )
 
 
-def add_coordinates_to_members(
-    members: List[GroupMember], coordinates: List[Dict]
-) -> List[GroupMember]:
-    """Update members with their corresponding coordinates."""
-    for member in members:
-        for coord in coordinates:
-            if member["name"] == coord["name"]:
-                member["lat"] = coord["lat"]
-                member["lng"] = coord["lng"]
-    return members
-
-
-def geolocate_members(
-    members: List[GroupMember], preferences: List[str], budget: int
-) -> List[Dict]:
-    """Get restaurants from Google Places API based on preferences and budget."""
+def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
+    """Get member coordinates from Google Geocode API based on member locations."""
     api_key = os.getenv("GOOGLE_MAPS_API_KEY")
     if not api_key:
         return [{"error": "Google Maps API key not found"}]
@@ -68,14 +54,13 @@ def geolocate_members(
             member_coordinates.append(
                 {"name": member["name"], "lat": location["lat"], "lng": location["lng"]}
             )
+            member["coordinates"] = [location["lat"], location["lng"]]
         else:
             print(
                 f"Warning: Could not geocode {member['name']}'s location: {member['location']}"
             )
 
     print(member_coordinates)
-
-    members = add_coordinates_to_members(members, member_coordinates)
 
     # Calculate the center point (centroid) of all member locations
     center_lat = sum(coord["lat"] for coord in member_coordinates) / len(
@@ -97,7 +82,7 @@ def restaurant_agent(state: State):
     preferences = state["preferences"]
     budget = state["budget"]
 
-    center_lat, center_lng = geolocate_members(members, preferences, budget)
+    center_lat, center_lng = geolocate_members_and_get_center(members)
 
     # Create output parser for structured response
     parser = PydanticOutputParser(pydantic_object=RestaurantResponse)
@@ -161,11 +146,14 @@ def restaurant_agent(state: State):
             # Fallback
             actual_text = str(raw_output)
 
-        print("Raw output from agent:", actual_text)
+        # print("Raw output from agent:", actual_text)
 
         structured_response = parser.parse(actual_text)
-        print("Structured response:", structured_response)
-        return {"candidate_restaurants": structured_response}
+        # print("Structured response:", structured_response)
+        return {
+            "candidate_restaurants": structured_response,
+            "members": members,
+        }
     except Exception as e:
         print(f"Could not parse structured output: {e}")
         # Fallback to raw output if parsing fails
