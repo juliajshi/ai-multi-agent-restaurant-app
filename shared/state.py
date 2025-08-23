@@ -21,3 +21,4 @@ class State(TypedDict):
     candidate_restaurants: List[Dict]  # Output from Restaurant Agent
     travel_times: Dict[str, Dict[str, int]]  # person -> restaurant -> time
     final_suggestions: List[Dict]
+    member_coordinates: List[Dict]
