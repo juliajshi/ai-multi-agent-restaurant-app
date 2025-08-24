@@ -10,11 +10,11 @@ from tools.distance_matrix import get_distance_matrix
 
 class Restaurant(BaseModel):
     name: str = Field(description="The name of the restaurant")
-    transportation_fairness_score: float = Field(
+    transportation_score: float = Field(
         description="The score of how fair the transportation for all members for this restaurant"
     )
     travel_times: Dict[str, int] = Field(
-        description="The travel times to this restaurant for each member"
+        description="The travel times to this restaurant for each member (in minutes)"
     )
 
 
@@ -30,6 +30,23 @@ def transportation_agent(state: State):
     # get the members and restaurants
     members = state["members"]
     restaurants = state["candidate_restaurants"]
+    preferences = state["preferences"]
+    budget = state["budget"]
+
+    print("in the transportation agent")
+
+    # getting the member coordinates and restaurant coordinates
+    name_and_coords = [
+        {"name": member["name"], "coordinates": member["coordinates"]}
+        for member in members
+    ]
+
+    restaurant_name_coords = [
+        (restaurant.name, restaurant.coordinates) for restaurant in restaurants
+    ]
+
+    print("restaurant_name_coords", restaurant_name_coords)
+    print("name_and_coords", name_and_coords)
 
     parser = PydanticOutputParser(pydantic_object=RestaurantsAndScore)
 
@@ -46,10 +63,9 @@ def transportation_agent(state: State):
                 2. Compute the transportation fairness score for each restaurant based on the travel times for each member.
 
                 When scoring:
-                - The score is a number between 0 and 100, where 0 is the travel times for each restaurant are the most different and 100 is where they are the most similar.
-                - Explain why you gave the score you did for each restaurant.
-
-
+                - The score is a number between 0 and 100, where 0 means travel times are very unfair (big differences) and 100 means they are very fair (similar times)
+                - Consider both absolute travel times and relative fairness between members
+                - Lower average travel time is better, but fairness (similarity) is most important
 
                 {format_instructions}
                 """,
@@ -66,7 +82,7 @@ def transportation_agent(state: State):
 
     result = agent_executor.invoke(
         {
-            "input": f"Score the restaurants provided by their transportation fairness score. The restaurants are: {restaurants}. The members are: {members}."
+            "input": f"Score the restaurants provided by their transportation fairness score. The restaurants are {restaurant_name_coords}. Members and their locations are in {name_and_coords}. Use the get_distance_matrix tool to get the travel times from each member's location to all of the restaurant locations. The travel times are in minutes."
         }
     )
 
@@ -91,11 +107,21 @@ def transportation_agent(state: State):
         # print("Raw output from agent:", actual_text)
 
         structured_response = parser.parse(actual_text)
-        print("Structured response:", structured_response)
+        print("Structured response FROM TRANSPORTATION AGENT:", structured_response)
         return {
-            "final_suggestions": structured_response,
+            "transportation_scores": structured_response.restaurants,
             "members": members,
+            "preferences": preferences,
+            "budget": budget,
+            "candidate_restaurants": restaurants,
         }
     except Exception as e:
-        print(f"Could not parse structured output: {e}")
+        print(f"Could not parse structured output in transportation agent: {e}")
         # Fallback to raw output if parsing fails
+        return {
+            "transportation_scores": [],
+            "members": members,
+            "preferences": preferences,
+            "budget": budget,
+            "candidate_restaurants": restaurants,
+        }

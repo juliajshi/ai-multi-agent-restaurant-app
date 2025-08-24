@@ -41,10 +41,11 @@ def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
     if not api_key:
         return [{"error": "Google Maps API key not found"}]
 
+    geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
     # Geocode member locations using direct HTTP requests
     member_coordinates = []
     for member in members:
-        geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
+
         geocode_params = {"address": member["location"], "key": api_key}
         geocode_response = requests.get(geocode_url, params=geocode_params)
         geocode_data = geocode_response.json()
@@ -57,7 +58,7 @@ def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
             member["coordinates"] = [location["lat"], location["lng"]]
         else:
             print(
-                f"Warning: Could not geocode {member['name']}'s location: {member['location']}"
+                f"Warning: Could not geocode {member['name']}'s location: {member['location']}. Geocode data: {geocode_data}"
             )
 
     print(member_coordinates)
@@ -82,6 +83,7 @@ def restaurant_agent(state: State):
     preferences = state["preferences"]
     budget = state["budget"]
 
+    print("in the restaurant agent")
     center_lat, center_lng = geolocate_members_and_get_center(members)
 
     # Create output parser for structured response
@@ -97,7 +99,7 @@ def restaurant_agent(state: State):
             
             INSTRUCTIONS:
             1. Use the search_places_nearby tool to find restaurants near the center location
-            3. Match restaurant options to the stated cuisine preferences
+            3. Match restaurant options to the top 3 most frequent stated cuisine preferences
             4. Respect the specified budget constraints
             5. Prioritize restaurants with good ratings and reviews
             6. Provide clear reasoning for your recommendations
@@ -123,7 +125,7 @@ def restaurant_agent(state: State):
 
     result = agent_executor.invoke(
         {
-            "input": f"Find restaurants for a group with preferences: {preferences}, budget: {budget}, center location: ({center_lat:.4f}, {center_lng:.4f}). Search for restaurants using the tool and recommend the top 3 that best serve this group."
+            "input": f"Find restaurants for a group with the most frequent from the following preferences: {preferences}, budget: {budget}, center location: ({center_lat:.4f}, {center_lng:.4f}). Search for restaurants using the tool and recommend the top 3 that best serve this group."
         }
     )
 
@@ -139,6 +141,7 @@ def restaurant_agent(state: State):
         ):
             # Structure: [{'text': '...', 'type': 'text', 'index': 0}]
             actual_text = raw_output[0]["text"]
+            # ["top_recommendations"]
         elif isinstance(raw_output, str):
             # Structure: direct string
             actual_text = raw_output
@@ -149,11 +152,19 @@ def restaurant_agent(state: State):
         # print("Raw output from agent:", actual_text)
 
         structured_response = parser.parse(actual_text)
-        # print("Structured response:", structured_response)
+        print("Structured response FROM RESTAURANT AGENT:", structured_response)
         return {
-            "candidate_restaurants": structured_response,
+            "candidate_restaurants": structured_response.top_recommendations,
             "members": members,
+            "preferences": preferences,
+            "budget": budget,
         }
     except Exception as e:
-        print(f"Could not parse structured output: {e}")
+        print(f"Could not parse structured output in restaurant agent: {e}")
         # Fallback to raw output if parsing fails
+        return {
+            "candidate_restaurants": [],
+            "members": members,
+            "preferences": preferences,
+            "budget": budget,
+        }

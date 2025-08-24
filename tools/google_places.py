@@ -15,7 +15,7 @@ def search_places_nearby(
     radius: Annotated[float, "Search radius in meters"] = 5000.0,
     field_mask: Annotated[
         str, "Fields to include in the response"
-    ] = "places.displayName,places.rating,places.userRatingCount,places.formattedAddress,places.types,places.priceLevel",
+    ] = "places.displayName,places.rating,places.userRatingCount,places.formattedAddress,places.types,places.priceLevel,places.location",
 ) -> List[Dict]:
     """
     Search for places near a given location using Google Places (New) API.
@@ -38,6 +38,7 @@ def search_places_nearby(
                     "radius": radius,
                 }
             },
+            "openNow": False,
         }
 
         # Set headers
@@ -64,6 +65,10 @@ def search_places_nearby(
                     "user_ratings_total": place.get("userRatingCount", 0),
                     "types": place.get("types", []),
                     "price_level": place.get("priceLevel", "PRICE_LEVEL_MODERATE"),
+                    "coordinates": [
+                        place.get("location", {}).get("latitude", 0),
+                        place.get("location", {}).get("longitude", 0),
+                    ],
                 }
                 formatted_places.append(formatted_place)
 

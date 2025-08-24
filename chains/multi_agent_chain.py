@@ -19,7 +19,7 @@ def create_multi_agent_graph():
     graph_builder.add_node("transportation_agent", transportation_agent)
     graph_builder.add_node("output_agent", output_agent)
 
-    # add edges
+    # # add edges
     graph_builder.add_edge(START, "input_agent")
     graph_builder.add_edge("input_agent", "restaurant_agent")
     graph_builder.add_edge("restaurant_agent", "transportation_agent")
@@ -47,28 +47,32 @@ def run_multi_agent_workflow():
         "budget": 0,
         "candidate_restaurants": [],
         "travel_times": {},
+        "transportation_scores": [],
         "final_suggestions": [],
+        "travel_preferences": [],
     }  # initial State
 
     print("Multi-Agent Workflow Started! (Type 'exit' to quit)")
 
-    # while True:
-    # user_input = input("Enter a message: ")
-    user_input = "Annie is in Midtown NYC and likes cheap Thai and Indian food. Bob is in East Village and likes Thai and Japanese food. Charlie is in Soho, NYC and likes cheap Mexican food. "
-    if user_input == "exit":
-        print("Goodbye!")
-        # break
+    while True:
+        user_input = input("Enter a message: ")
 
-    # Add user input to messages
-    state["messages"] = state.get("messages", []) + [
-        {"role": "user", "content": user_input}
-    ]
+        if user_input.lower() == "exit":
+            print("Goodbye!")
+            break
 
-    # Invoke graph with state
-    state = graph.invoke(state)
+        # Add user input to messages
+        state["messages"] = state.get("messages", []) + [
+            {"role": "user", "content": user_input}
+        ]
 
-    # Print the assistant's response
-    if state.get("messages") and len(state["messages"]) > 0:
-        last_message = state["messages"][-1]
-        print(f"\n{last_message.content}\n")
-        print("-" * 50)
+        # Invoke graph with state
+        state = graph.invoke(state)
+
+        # print("THIS IS THE STATE AT THE END OF THE WORKFLOW: ", state)
+
+        # Print the assistant's response
+        if state.get("messages") and len(state["messages"]) > 0:
+            last_message = state["messages"][-1]
+            # print(f"\n{last_message.content}\n")
+            print("-" * 50)

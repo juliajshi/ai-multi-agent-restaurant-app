@@ -75,6 +75,10 @@ def get_distance_matrix(
         response = requests.post(url, json=request_body, headers=headers)
 
         if response.status_code == 200:
+            print(
+                "Distance matrix response from the distance matrix tool: ",
+                response.json(),
+            )
             return response.json()
         else:
             return [
