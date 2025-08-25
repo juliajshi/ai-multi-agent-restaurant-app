@@ -9,6 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from tools.google_places import search_places_nearby
 from pydantic import BaseModel, Field
+from shared.parsing import parse_structured_output
 
 
 class Restaurant(BaseModel):
@@ -42,7 +43,7 @@ def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
         return [{"error": "Google Maps API key not found"}]
 
     geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
-    # Geocode member locations using direct HTTP requests
+
     member_coordinates = []
     for member in members:
 
@@ -61,9 +62,6 @@ def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
                 f"Warning: Could not geocode {member['name']}'s location: {member['location']}. Geocode data: {geocode_data}"
             )
 
-    print(member_coordinates)
-
-    # Calculate the center point (centroid) of all member locations
     center_lat = sum(coord["lat"] for coord in member_coordinates) / len(
         member_coordinates
     )
@@ -71,9 +69,6 @@ def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
         member_coordinates
     )
 
-    print(
-        f"🎯 Search center: {center_lat:.4f}, {center_lng:.4f} (midpoint of {len(member_coordinates)} locations)"
-    )
     return center_lat, center_lng
 
 
@@ -83,10 +78,8 @@ def restaurant_agent(state: State):
     preferences = state["preferences"]
     budget = state["budget"]
 
-    print("in the restaurant agent")
     center_lat, center_lng = geolocate_members_and_get_center(members)
 
-    # Create output parser for structured response
     parser = PydanticOutputParser(pydantic_object=RestaurantResponse)
 
     prompt = ChatPromptTemplate.from_messages(
@@ -121,7 +114,7 @@ def restaurant_agent(state: State):
     llm = get_llm()
     tools = [search_places_nearby]
     agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
 
     result = agent_executor.invoke(
         {
@@ -129,42 +122,15 @@ def restaurant_agent(state: State):
         }
     )
 
-    # Try to parse the structured output
-    try:
-        raw_output = result.get("output")
-        actual_text = raw_output[0]["text"]
-        # Handle both possible response structures
-        if (
-            isinstance(raw_output, list)
-            and len(raw_output) > 0
-            and "text" in raw_output[0]
-        ):
-            # Structure: [{'text': '...', 'type': 'text', 'index': 0}]
-            actual_text = raw_output[0]["text"]
-            # ["top_recommendations"]
-        elif isinstance(raw_output, str):
-            # Structure: direct string
-            actual_text = raw_output
-        else:
-            # Fallback
-            actual_text = str(raw_output)
-
-        # print("Raw output from agent:", actual_text)
-
-        structured_response = parser.parse(actual_text)
-        print("Structured response FROM RESTAURANT AGENT:", structured_response)
-        return {
-            "candidate_restaurants": structured_response.top_recommendations,
-            "members": members,
-            "preferences": preferences,
-            "budget": budget,
-        }
-    except Exception as e:
-        print(f"Could not parse structured output in restaurant agent: {e}")
-        # Fallback to raw output if parsing fails
-        return {
-            "candidate_restaurants": [],
-            "members": members,
-            "preferences": preferences,
-            "budget": budget,
-        }
+    structured_response = parse_structured_output(result, parser)
+    candidate_restaurants = (
+        structured_response.top_recommendations
+        if structured_response is not None
+        else []
+    )
+    return {
+        "candidate_restaurants": candidate_restaurants,
+        "members": members,
+        "preferences": preferences,
+        "budget": budget,
+    }

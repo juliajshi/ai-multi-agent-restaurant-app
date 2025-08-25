@@ -19,15 +19,13 @@ def output_agent(state: State):
     # - Travel times for each member
     # - Cost Category
 
-    print("in the output agent")
-
     llm = get_llm()
 
     prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                "You are a helpful assistant that outputs the final suggestions in a table format that can be shown in the terminal. Format the table to be readable with equal spacing for each column. Include the following columns: Restaurant name as a link to the GoogleMaps link, rating, number of reviews, cuisine type, price level, Travel times for each member (in minutes), Cost Category ($, $$, $$$, $$$$). Make sure to include the link to the GoogleMaps link for each restaurant (use the format https://www.google.com/maps/search/the restaurant name with spaces replaced with +).",
+                "You are a helpful assistant that outputs the final suggestions in a table format that can be shown in the terminal. Format the table to be readable with equal spacing for each column. Include the following columns: Restaurant name as a link to the GoogleMaps link, rating, number of reviews, cuisine type, price level ($, $$, $$$, $$$$), Travel times for each member (in minutes)). Make sure to include the link to the GoogleMaps link for each restaurant (use the format https://www.google.com/maps/search/the restaurant name with spaces replaced with +).",
             ),
             (
                 "human",
@@ -41,8 +39,18 @@ def output_agent(state: State):
             transportation_scores=transportation_scores, restaurant_data=restaurant_data
         )
     )
-    print("FINAL Result:", result.content)
 
     return {
+        "transportation_scores": transportation_scores,
+        "members": members,
+        "preferences": preferences,
+        "budget": budget,
+        "candidate_restaurants": restaurant_data,
         "final_suggestions": result.content,
+        "messages": [
+            {
+                "role": "assistant",
+                "content": result.content,
+            }
+        ],
     }

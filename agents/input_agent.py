@@ -32,7 +32,7 @@ def input_agent(state: State):
     Example input: "Annie is in Midtown NYC and likes cheap Thai and Indian food. Bob is in East Village and likes Thai and Japanese food and can walk. Charlie is in Soho, NYC and likes cheap Mexican food and can walk. "
     
     Example output:
-    - Members: [{"name": "Annie", "location": "Midtown NYC", "diet": "none", "travel_preferences": ["driving"]}, {"name": "Bob", "location": "East Village", "diet": "none", "travel_preferences": ["walking"]}, {"name": "Charlie", "location": "Soho, NYC", "diet": "none", "travel_preferences": ["walking"]}]
+    - Members: [{"name": "Annie", "location": "Midtown NYC", "diet": "none", "travel_preferences": ["driving", "walking"]}, {"name": "Bob", "location": "East Village", "diet": "none", "travel_preferences": ["walking"]}, {"name": "Charlie", "location": "Soho, NYC", "diet": "none", "travel_preferences": ["walking"]}]
     - Preferences: "Thai, Indian, or Japanese food"
     - Budget: 25
     """,

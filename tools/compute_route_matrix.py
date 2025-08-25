@@ -6,7 +6,7 @@ from typing import Annotated
 
 
 @tool
-def get_distance_matrix(
+def get_compute_route_matrix(
     origins: Annotated[
         List[List[float]],
         "contains member origin locations with latitude and longitude",
@@ -75,10 +75,10 @@ def get_distance_matrix(
         response = requests.post(url, json=request_body, headers=headers)
 
         if response.status_code == 200:
-            print(
-                "Distance matrix response from the distance matrix tool: ",
-                response.json(),
-            )
+            # print(
+            #     "Distance matrix response from the distance matrix tool: ",
+            #     response.json(),
+            # )
             return response.json()
         else:
             return [

@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
-from tools.distance_matrix import get_distance_matrix
+from tools.compute_route_matrix import get_compute_route_matrix
+from shared.parsing import parse_structured_output
 
 
 class Restaurant(BaseModel):
@@ -27,26 +28,23 @@ class RestaurantsAndScore(BaseModel):
 def transportation_agent(state: State):
     """Get distance matrix between members and restaurants and rate how fair the distance is for each restaurant"""
 
-    # get the members and restaurants
     members = state["members"]
     restaurants = state["candidate_restaurants"]
     preferences = state["preferences"]
     budget = state["budget"]
 
-    print("in the transportation agent")
-
-    # getting the member coordinates and restaurant coordinates
     name_and_coords = [
-        {"name": member["name"], "coordinates": member["coordinates"]}
+        {
+            "name": member["name"],
+            "coordinates": member["coordinates"],
+            "travel_preferences": member["travel_preferences"],
+        }
         for member in members
     ]
 
     restaurant_name_coords = [
         (restaurant.name, restaurant.coordinates) for restaurant in restaurants
     ]
-
-    print("restaurant_name_coords", restaurant_name_coords)
-    print("name_and_coords", name_and_coords)
 
     parser = PydanticOutputParser(pydantic_object=RestaurantsAndScore)
 
@@ -76,52 +74,24 @@ def transportation_agent(state: State):
     ).partial(format_instructions=parser.get_format_instructions())
 
     llm = get_llm()
-    tools = [get_distance_matrix]
+    tools = [get_compute_route_matrix]
     agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    agent_executor = AgentExecutor(agent=agent, tools=tools)
 
     result = agent_executor.invoke(
         {
-            "input": f"Score the restaurants provided by their transportation fairness score. The restaurants are {restaurant_name_coords}. Members and their locations are in {name_and_coords}. Use the get_distance_matrix tool to get the travel times from each member's location to all of the restaurant locations. The travel times are in minutes."
+            "input": f"Score the restaurants provided by their transportation fairness score. The restaurants are {restaurant_name_coords}. Members and their locations are in {name_and_coords}, for now, use DRIVE as the travel mode. Use the get_compute_route_matrix tool to get the travel times from each member's location to all of the restaurant locations. The travel times are in minutes."
         }
     )
 
-    try:
-        raw_output = result.get("output")
-        actual_text = raw_output[0]["text"]
-        # Handle both possible response structures
-        if (
-            isinstance(raw_output, list)
-            and len(raw_output) > 0
-            and "text" in raw_output[0]
-        ):
-            # Structure: [{'text': '...', 'type': 'text', 'index': 0}]
-            actual_text = raw_output[0]["text"]
-        elif isinstance(raw_output, str):
-            # Structure: direct string
-            actual_text = raw_output
-        else:
-            # Fallback
-            actual_text = str(raw_output)
-
-        # print("Raw output from agent:", actual_text)
-
-        structured_response = parser.parse(actual_text)
-        print("Structured response FROM TRANSPORTATION AGENT:", structured_response)
-        return {
-            "transportation_scores": structured_response.restaurants,
-            "members": members,
-            "preferences": preferences,
-            "budget": budget,
-            "candidate_restaurants": restaurants,
-        }
-    except Exception as e:
-        print(f"Could not parse structured output in transportation agent: {e}")
-        # Fallback to raw output if parsing fails
-        return {
-            "transportation_scores": [],
-            "members": members,
-            "preferences": preferences,
-            "budget": budget,
-            "candidate_restaurants": restaurants,
-        }
+    structured_response = parse_structured_output(result, parser)
+    transportation_scores = (
+        structured_response.restaurants if structured_response is not None else []
+    )
+    return {
+        "transportation_scores": transportation_scores,
+        "members": members,
+        "preferences": preferences,
+        "budget": budget,
+        "candidate_restaurants": restaurants,
+    }
