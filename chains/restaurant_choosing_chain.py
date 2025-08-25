@@ -11,34 +11,23 @@ from langchain.schema import AIMessage
 
 def create_multi_agent_graph():
     """Create and return the multi-agent workflow graph."""
-    # Define graph builder
     graph_builder = StateGraph(State)
 
-    # add nodes
     graph_builder.add_node("input_agent", input_agent)
     graph_builder.add_node("restaurant_agent", restaurant_agent)
     graph_builder.add_node("transportation_agent", transportation_agent)
     graph_builder.add_node("output_agent", output_agent)
 
-    # # add edges
     graph_builder.add_edge(START, "input_agent")
     graph_builder.add_edge("input_agent", "restaurant_agent")
     graph_builder.add_edge("restaurant_agent", "transportation_agent")
     graph_builder.add_edge("transportation_agent", "output_agent")
     graph_builder.add_edge("output_agent", END)
 
-    # #example for adding conditional edges
-    # graph_builder.add_conditional_edges(
-    #     "router",  # source
-    #     lambda state: state.get("next"),  # function that returns the next node to go to based on the state
-    #     {"therapist": "therapist", "logical": "logical"}  # conditional path map
-    # )
-
-    # Compile and return the graph
     return graph_builder.compile()
 
 
-def run_multi_agent_workflow():
+def run_restaurant_choosing_chain():
     """Run the multi-agent workflow with user interaction."""
     graph = create_multi_agent_graph()
     state = {

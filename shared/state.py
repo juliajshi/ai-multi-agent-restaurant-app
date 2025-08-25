@@ -12,11 +12,10 @@ class GroupMember(TypedDict):
 
 
 class State(TypedDict):
-    messages: Annotated[list, add_messages]  # Add messages for input parsing
+    messages: Annotated[list, add_messages]
     members: List[GroupMember]
-    preferences: List[str]
-    budget: int
-    candidate_restaurants: List[Dict]  # Output from Restaurant Agent
-    # travel_times: Dict[str, Dict[str, int]]  # person -> restaurant -> time
-    final_suggestions: List[Dict]
+    preferences: str
+    budget: str
+    candidate_restaurants: List[Dict]
+    final_suggestions: str
     transportation_scores: List[Dict]

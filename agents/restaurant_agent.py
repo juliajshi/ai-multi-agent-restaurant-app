@@ -74,11 +74,8 @@ def geolocate_members_and_get_center(members: List[GroupMember]) -> List[Dict]:
 
 def restaurant_agent(state: State):
     """Get candidate restaurants based on the user's preferences and budget."""
-    members = state["members"]
-    preferences = state["preferences"]
-    budget = state["budget"]
 
-    center_lat, center_lng = geolocate_members_and_get_center(members)
+    center_lat, center_lng = geolocate_members_and_get_center(state["members"])
 
     parser = PydanticOutputParser(pydantic_object=RestaurantResponse)
 
@@ -118,7 +115,7 @@ def restaurant_agent(state: State):
 
     result = agent_executor.invoke(
         {
-            "input": f"Find restaurants for a group with the most frequent from the following preferences: {preferences}, budget: {budget}, center location: ({center_lat:.4f}, {center_lng:.4f}). Search for restaurants using the tool and recommend the top 3 that best serve this group."
+            "input": f"Find restaurants for a group with the most frequent from the following preferences: {state['preferences']}, budget: {state['budget']}, center location: ({center_lat:.4f}, {center_lng:.4f}). Search for restaurants using the tool and recommend the top 3 that best serve this group."
         }
     )
 
@@ -130,7 +127,7 @@ def restaurant_agent(state: State):
     )
     return {
         "candidate_restaurants": candidate_restaurants,
-        "members": members,
-        "preferences": preferences,
-        "budget": budget,
+        "members": state["members"],
+        "preferences": state["preferences"],
+        "budget": state["budget"],
     }

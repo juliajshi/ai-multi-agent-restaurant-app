@@ -28,22 +28,21 @@ class RestaurantsAndScore(BaseModel):
 def transportation_agent(state: State):
     """Get distance matrix between members and restaurants and rate how fair the distance is for each restaurant"""
 
-    members = state["members"]
-    restaurants = state["candidate_restaurants"]
-    preferences = state["preferences"]
-    budget = state["budget"]
-
     name_and_coords = [
         {
             "name": member["name"],
             "coordinates": member["coordinates"],
             "travel_preferences": member["travel_preferences"],
         }
-        for member in members
+        for member in state["members"]
     ]
 
     restaurant_name_coords = [
-        (restaurant.name, restaurant.coordinates) for restaurant in restaurants
+        {
+            "restaurant_name": restaurant.name,
+            "restaurant_coordinates": restaurant.coordinates,
+        }
+        for restaurant in state["candidate_restaurants"]
     ]
 
     parser = PydanticOutputParser(pydantic_object=RestaurantsAndScore)
@@ -90,8 +89,8 @@ def transportation_agent(state: State):
     )
     return {
         "transportation_scores": transportation_scores,
-        "members": members,
-        "preferences": preferences,
-        "budget": budget,
-        "candidate_restaurants": restaurants,
+        "members": state["members"],
+        "preferences": state["preferences"],
+        "budget": state["budget"],
+        "candidate_restaurants": state["candidate_restaurants"],
     }

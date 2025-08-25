@@ -5,8 +5,10 @@ from pydantic import BaseModel, Field
 
 
 class InputResponse(BaseModel):
-    members: list[GroupMember]
-    preferences: str
+    members: list[GroupMember] = Field(
+        description="List of people with their name, location, dietary preferences, and travel preferences (driving, walking, biking, etc. Assume driving if not specified)"
+    )
+    preferences: str = Field(description="Short description of the group's preferences")
     budget: int = Field(
         description="Budget per person in dollars, default to 25 if not specified"
     )
@@ -34,7 +36,7 @@ def input_agent(state: State):
     Example output:
     - Members: [{"name": "Annie", "location": "Midtown NYC", "diet": "none", "travel_preferences": ["driving", "walking"]}, {"name": "Bob", "location": "East Village", "diet": "none", "travel_preferences": ["walking"]}, {"name": "Charlie", "location": "Soho, NYC", "diet": "none", "travel_preferences": ["walking"]}]
     - Preferences: "Thai, Indian, or Japanese food"
-    - Budget: 25
+    - Budget: "cheap to midrange"
     """,
             },
             {"role": "user", "content": last_message.content},

@@ -1,4 +1,4 @@
-from chains.multi_agent_chain import run_multi_agent_workflow
+from chains.restaurant_choosing_chain import run_restaurant_choosing_chain
 
 if __name__ == "__main__":
-    run_multi_agent_workflow()
+    run_restaurant_choosing_chain()
