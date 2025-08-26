@@ -17,6 +17,11 @@ class InputResponse(BaseModel):
 def input_agent(state: State):
     """Parse the user's input into a structured format of members, preferences, and budget."""
     last_message = state["messages"][-1]
+    # Handle both dict and LangChain message object formats
+    if hasattr(last_message, "content"):
+        message_content = last_message.content
+    else:
+        message_content = last_message.get("content", "")
     llm = get_llm()
     input_parser = llm.with_structured_output(InputResponse)
 
@@ -39,12 +44,28 @@ def input_agent(state: State):
     - Budget: "cheap to midrange"
     """,
             },
-            {"role": "user", "content": last_message.content},
+            {"role": "user", "content": message_content},
         ]
     )
 
-    return {
-        "members": result.members,
-        "preferences": result.preferences,
-        "budget": result.budget,
-    }
+    # Check if this is a followup request - if so, let followup_agent handle member merging
+    is_followup = not state.get("is_initial_request", True)
+
+    if is_followup:
+        # For followup requests, only pass newly mentioned members
+        return {
+            "members": result.members,  # New members only (will be merged in followup_agent)
+            "preferences": (
+                result.preferences
+                if result.preferences
+                else state.get("preferences", "")
+            ),
+            "budget": result.budget if result.budget else state.get("budget", ""),
+        }
+    else:
+        # For initial requests, use all parsed members
+        return {
+            "members": result.members,
+            "preferences": result.preferences,
+            "budget": result.budget,
+        }

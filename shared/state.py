@@ -19,3 +19,6 @@ class State(TypedDict):
     candidate_restaurants: List[Dict]
     final_suggestions: str
     transportation_scores: List[Dict]
+    needs_new_search: bool  # For followup handling
+    followup_response: str  # Response to followup questions
+    is_initial_request: bool  # Track if this is the first request
