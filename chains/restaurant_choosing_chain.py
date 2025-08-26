@@ -40,7 +40,7 @@ def run_restaurant_choosing_chain():
         "transportation_scores": [],
         "final_suggestions": [],
         "travel_preferences": [],
-    }  # initial State
+    }
 
     print("\nAI Assistant for Group Dining! (Type 'exit' to quit)")
     print("\nEnter your input in the following format:")

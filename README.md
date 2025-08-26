@@ -1,16 +1,8 @@
-# AI Multi-Agent Restaurant Recommendation App 🍽️
+# AI Multi-Agent Restaurant Recommendation App
 
 An intelligent restaurant recommendation system powered by multiple AI agents that helps groups find the perfect dining experience based on location fairness, preferences, and budget.
 
-## 🚀 Features
-
-- **Multi-Agent Architecture**: Specialized agents for input processing, restaurant search, transportation analysis, and output formatting
-- **Location-Based Search**: Uses Google Places API to find restaurants near your group
-- **Transportation Fairness**: Calculates travel times and fairness scores using Google Distance Matrix API
-- **Smart Recommendations**: Considers dietary preferences, budget constraints, and location equity
-- **Real-time Data**: Live restaurant information including ratings, reviews, and current status
-
-## 🏗️ Architecture
+## Architecture
 
 The app uses a **LangGraph** multi-agent workflow with four specialized agents:
 
@@ -19,37 +11,17 @@ The app uses a **LangGraph** multi-agent workflow with four specialized agents:
 3. **Transportation Agent**: Calculates travel times and fairness scores using Google Distance Matrix API
 4. **Output Agent**: Formats final recommendations in a readable table format
 
-## 📋 Prerequisites
+## Model Specifications
+
+The application uses Anthropic **Claude Sonnet 4** (claude-sonnet-4-20250514) as the core AI model for all agent operations.
+
+## Prerequisites
 
 - **Python 3.12+**
 - **Anthropic API Key** (for Claude AI)
 - **Google Maps API Key** (for Places and Distance Matrix APIs)
 
-## 🔑 API Key Setup
-
-### 1. Get an Anthropic API Key
-
-1. Visit [Anthropic Console](https://console.anthropic.com/)
-2. Sign up or log in to your account
-3. Navigate to **API Keys** section
-4. Click **"Create Key"**
-5. Give your key a name (e.g., "Restaurant App")
-6. Copy the generated API key (starts with `sk-ant-`)
-
-### 2. Get a Google Maps API Key
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the following APIs:
-   - **Places API (New)**
-   - **Distance Matrix API**
-   - **Geocoding API**
-4. Navigate to **APIs & Services > Credentials**
-5. Click **"Create Credentials" > "API Key"**
-6. Copy the generated API key
-7. **(Recommended)** Restrict the API key to only the required APIs for security
-
-### 3. Set up Environment Variables
+### Set up Environment Variables
 
 Create a `.env` file in the project root:
 
@@ -59,37 +31,26 @@ ANTHROPIC_API_KEY=sk-ant-your-anthropic-key-here
 GOOGLE_MAPS_API_KEY=your-google-maps-api-key-here
 ```
 
-**Important**: Never commit your `.env` file to version control!
-
-## 🛠️ Installation
+## Installation
 
 ### Using UV
 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd ai-multiagent-restaurant-app
+cd ai-multi-agent-restaurant-app
 
 # Install dependencies with UV
 uv sync
-
-# Activate the virtual environment
-source .venv/bin/activate  # On macOS/Linux
-# OR
-.venv\Scripts\activate     # On Windows
 ```
 
-## 🎯 Usage
+## Usage
 
 ### Running the Application
 
 ```bash
 uv run python main.py
 ```
-
-### Use Case
-
-Use this to help plan where to meet with your friends for dinner.
 
 ### Input Format
 
@@ -114,9 +75,6 @@ Annie is in Midtown NYC and likes cheap Thai and Indian food. Bob is in East Vil
 
 # Example 2: San Francisco Group
 Sarah is in Mission District, SF and likes moderate Italian food. Mike is in SOMA, SF and likes Asian cuisine. Lisa is in Castro, SF and likes vegetarian Mexican food.
-
-# Example 3: With Transportation Preferences
-John is in Downtown LA and likes expensive steakhouses and will drive. Emma is in Santa Monica and likes moderate seafood and prefers public transit.
 ```
 
 ### Output
@@ -143,7 +101,7 @@ John is in Downtown LA and likes expensive steakhouses and will drive. Emma is i
 All three restaurants offer excellent Thai cuisine at budget-friendly prices ($) that fit your $25 constraint.
 ```
 
-## 🔧 Dependencies
+## Dependencies
 
 - **langchain[anthropic]**: Claude AI integration
 - **langgraph**: Multi-agent workflow framework
