@@ -80,25 +80,23 @@ Sarah is in Mission District, SF and likes moderate Italian food. Mike is in SOM
 ### Output
 
 ```
-+------------------------------------------+--------+----------+-------------+-------+-------+-----+---------+
-| Restaurant Name                          | Rating | Reviews  | Cuisine     | Price | Annie | Bob | Charlie |
-+------------------------------------------+--------+----------+-------------+-------+-------+-----+---------+
-| 7 Elephants                              | 4.8    | 173      | Thai/Asian  | $     | 18    | 9   | 11      |
-| https://www.google.com/maps/search/7+Elephants                                                              |
-+------------------------------------------+--------+----------+-------------+-------+-------+-----+---------+
-| Aroy Dee Thai Kitchen                    | 4.6    | 1,559    | Thai        | $     | 20    | 14  | 7       |
-| https://www.google.com/maps/search/Aroy+Dee+Thai+Kitchen                                                    |
-+------------------------------------------+--------+----------+-------------+-------+-------+-----+---------+
-| Wondee Siam                              | 4.6    | 1,362    | Thai        | $     | 7     | 21  | 20      |
-| https://www.google.com/maps/search/Wondee+Siam                                                              |
-+------------------------------------------+--------+----------+-------------+-------+-------+-----+---------+
+Based on the transportation scores and restaurant data, here are the top 3 restaurants:
 
-**Rankings by Transportation Score:**
-1. **7 Elephants** (75.0) - Best overall travel times and highest rating
-2. **Aroy Dee Thai Kitchen** (65.0) - Good balance with most reviews
-3. **Wondee Siam** (55.0) - Lowest transportation score but still quality option
+┌─────────────────────────────────────────────────────────────────┬────────┬─────────┬─────────┬───────┬───────┬─────┬─────────┐
+│ Restaurant Name                                                 │ Rating │ Reviews │ Cuisine │ Price │ Annie │ Bob │ Charlie │
+│                                                                 │        │         │ Type    │ Level │ (min) │(min)│  (min)  │
+├─────────────────────────────────────────────────────────────────┼────────┼─────────┼─────────┼───────┼───────┼─────┼─────────┤
+│ Aroy Dee Thai Kitchen                                           │  4.6   │  1,559  │  Thai   │   $   │  19   │ 13  │    6    │
+│ https://www.google.com/maps/search/+Aroy+Dee+Thai+Kitchen       │        │         │         │       │       │     │         │
+├─────────────────────────────────────────────────────────────────┼────────┼─────────┼─────────┼───────┼───────┼─────┼─────────┤
+│ 7 Elephants                                                     │  4.8   │   173   │  Thai   │   $   │  20   │  8  │   10    │
+│ https://www.google.com/maps/search/+7+Elephants                 │        │         │         │       │       │     │         │
+├─────────────────────────────────────────────────────────────────┼────────┼─────────┼─────────┼───────┼───────┼─────┼─────────┤
+│ Wondee Siam                                                     │  4.6   │  1,363  │  Thai   │   $   │   7   │ 20  │   16    │
+│ https://www.google.com/maps/search/+Wondee+Siam                 │        │         │         │       │       │     │         │
+└─────────────────────────────────────────────────────────────────┴────────┴─────────┴─────────┴───────┴───────┴─────┴─────────┘
 
-All three restaurants offer excellent Thai cuisine at budget-friendly prices ($) that fit your $25 constraint.
+**Top Pick:** Aroy Dee Thai Kitchen leads with the highest transportation score (73.0) and has the most reviews (1,559), indicating proven quality and popularity. It offers the best balance of convenience and established reputation.
 ```
 
 ## Dependencies

@@ -13,7 +13,7 @@ def output_agent(state: State):
         [
             (
                 "system",
-                "You are a helpful assistant that outputs the final suggestions in a table format that can be shown in the terminal. Format the table to be readable with equal spacing for each column. Include the following columns: Restaurant name as a link to the GoogleMaps link, rating, number of reviews, cuisine type, price level ($, $$, $$$, $$$$), Travel times for each member (in minutes). Make sure to include the link to the GoogleMaps link for each restaurant (use the format https://www.google.com/maps/search/+the restaurant name with spaces replaced with +).",
+                "You are a helpful assistant that outputs the final suggestions in a table format that can be shown in the terminal. Format the table to be readable with equal spacing for each column. Include the following columns: Restaurant name as a link to the GoogleMaps link, rating, number of reviews, cuisine type, price level ($, $$, $$$, $$$$), Travel times for each member (labeled in minutes). Make sure to include the link to the GoogleMaps link for each restaurant (use the format https://www.google.com/maps/search/+the restaurant name with spaces replaced with +).",
             ),
             (
                 "human",
